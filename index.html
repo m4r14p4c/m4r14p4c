@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="gl">
+<head>
+<meta charset="UTF-8">
+<title>Secuencia especial</title>
+
+<style>
+    body {
+        background-color: black;
+        margin: 0;
+        overflow: hidden;
+        font-family: "Courier New", monospace;
+        color: #00ff00;
+        text-shadow: 0 0 8px #00ff00;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-direction: column;
+    }
+
+    button {
+        font-family: "MS Sans Serif", Arial, sans-serif;
+        font-size: 18px;
+        padding: 10px 20px;
+        background: #c0c0c0;
+        border: 2px solid #fff;
+        border-right-color: #404040;
+        border-bottom-color: #404040;
+        color: black;
+        cursor: pointer;
+        box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #fff;
+        margin: 10px;
+    }
+
+    button:active {
+        border: 2px solid #404040;
+        border-right-color: #fff;
+        border-bottom-color: #fff;
+        box-shadow: inset 1px 1px 0 #000, inset -1px -1px 0 #fff;
+        background: #b0b0b0;
+    }
+
+    #errorText {
+        display: none;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        font-size: 48px;
+        font-weight: bold;
+        color: red;
+        text-shadow: 0 0 10px red;
+        z-index: 10;
+    }
+
+    @keyframes glitchFlash {
+        0% { opacity: 1; transform: none; }
+        10% { opacity: 0.1; transform: skewX(25deg) translateX(-20px); }
+        20% { opacity: 1; transform: translateX(15px); }
+        30% { opacity: 0.2; transform: skewX(-25deg); }
+        40% { opacity: 1; transform: translateX(-10px); }
+        50% { opacity: 0.1; transform: skewX(30deg); }
+        60% { opacity: 1; transform: none; }
+        70% { opacity: 0.2; transform: translateX(20px); }
+        80% { opacity: 1; transform: skewX(-20deg); }
+        100% { opacity: 1; transform: none; }
+    }
+
+    #glitchOverlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(255,255,255,0.15);
+        animation: glitchFlash 0.15s infinite;
+        pointer-events: none;
+        z-index: 9;
+    }
+
+    #codeBox {
+        display: none;
+        position: fixed;
+        top: 40px;
+        left: 40px;
+        width: 90vw;
+        height: 90vh;
+        color: #00ff00;
+        font-size: 16px;
+        white-space: pre-wrap;
+        overflow-y: hidden;
+        z-index: 12;
+    }
+
+    #matrixCanvas {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 5;
+    }
+
+    #imageSpam {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 6;
+    }
+
+    .spamImg {
+        position: absolute;
+        width: 150px;
+        opacity: 0.95;
+    }
+
+    #videoContainer {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: black;
+        justify-content: center;
+        align-items: center;
+        z-index: 20;
+    }
+
+    video {
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+    }
+</style>
+</head>
+
+<body>
+
+<button id="btn1" onclick="mostrarBtn2()">Prema aquí para saír do modo de suspensión</button>
+
+<div style="display:flex; align-items:center;">
+    <img id="warningIcon" src="warning.png" style="display:none; width:100px; margin-right:10px;">
+    <button id="btn2" onclick="iniciarSecuencia()" style="display:none;">Seguridade do sistema comprometida. Prema aquí para volver atrás</button>
+</div>
+
+<audio id="alertSound" src="audio.mp4" loop></audio>
+<audio id="buttonSound" src="alerta.mp4"></audio>
+
+<div id="errorText">Error</div>
+<div id="glitchOverlay"></div>
+
+<div id="codeBox"></div>
+
+<canvas id="matrixCanvas"></canvas>
+<div id="imageSpam"></div>
+
+<div id="videoContainer">
+    <video id="video" controls>
+        <source src="video.mp4" type="video/mp4">
+    </video>
+</div>
+
+<script>
+function mostrarBtn2() {
+    document.getElementById("btn1").style.display = "none";
+    document.getElementById("warningIcon").style.display = "inline-block";
+    document.getElementById("btn2").style.display = "inline-block";
+
+    const sound = document.getElementById("buttonSound");
+    sound.currentTime = 0;
+    sound.play();
+}
+
+function iniciarSecuencia() {
+    document.getElementById("btn2").style.display = "none";
+
+    setTimeout(() => {
+        mostrarError();
+    }, 1000);
+}
+
+function mostrarError() {
+    document.getElementById("errorText").style.display = "block";
+    document.getElementById("glitchOverlay").style.display = "block";
+
+    document.getElementById("alertSound").play();
+
+    setTimeout(() => {
+        document.getElementById("errorText").style.display = "none";
+        document.getElementById("glitchOverlay").style.display = "none";
+        escribirCodigo();
+    }, 5000);
+}
+
+function escribirCodigo() {
+    const codeBox = document.getElementById("codeBox");
+    codeBox.style.display = "block";
+
+    const codeText = `
+import system
+import kernel
+import matrix.core as mx
+
+def initialize():
+    buffer = []
+    for i in range(0, 999999):
+        buffer.append(i * 42)
+    return buffer
+
+class Engine:
+    def __init__(self):
+        self.status = "BOOTING"
+        self.sequence = []
+
+    def load(self):
+        for i in range(0, 120):
+            self.sequence.append(i ** 3)
+        self.status = "READY"
+
+engine = Engine()
+engine.load()
+
+for i in range(0, 500):
+    print("PROCESSING BLOCK", i)
+    if i % 10 == 0:
+        print("ALLOCATING MEMORY", i * 32)
+
+print("SYSTEM ONLINE")
+print("LOADING MATRIX STREAM...")
+
+# ------------------------------
+# STARTING CORE EXECUTION LAYER
+# ------------------------------
+
+for x in range(0, 9999):
+    print("EXEC", x, "->", x * 2, "OK")
+`;
+
+    let index = 0;
+
+    const interval = setInterval(() => {
+        codeBox.textContent = codeText.substring(0, index);
+        codeBox.scrollTop = codeBox.scrollHeight;
+        index += 8;
+
+        if (index >= codeText.length) {
+            clearInterval(interval);
+        }
+    }, 20);
+
+    setTimeout(() => {
+        codeBox.style.display = "none";
+        iniciarMatrix();
+    }, 5000);
+}
+
+function iniciarMatrix() {
+    const canvas = document.getElementById("matrixCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.style.display = "block";
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const letters = "01";
+    const fontSize = 16;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = [];
+
+    for (let i = 0; i < columns; i++) drops[i] = Math.random() * canvas.height;
+
+    function drawMatrix() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "#00ff00";
+        ctx.font = fontSize + "px Courier";
+
+        for (let i = 0; i < drops.length; i++) {
+            const text = letters[Math.floor(Math.random() * letters.length)];
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+            drops[i] += 1.5 + Math.random() * 3;
+
+            if (drops[i] * fontSize > canvas.height) drops[i] = 0;
+        }
+    }
+
+    const matrixInterval = setInterval(drawMatrix, 25);
+
+    setTimeout(() => {
+        clearInterval(matrixInterval);
+        canvas.style.display = "none";
+        iniciarSpam();
+    }, 7000);
+}
+
+function iniciarSpam() {
+    const spam = document.getElementById("imageSpam");
+    spam.style.display = "block";
+
+    const intervalo = setInterval(() => {
+        const img = document.createElement("img");
+        img.src = "error.png";
+        img.className = "spamImg";
+        img.style.left = Math.random() * window.innerWidth + "px";
+        img.style.top = Math.random() * window.innerHeight + "px";
+        spam.appendChild(img);
+    }, 60);
+
+    setTimeout(() => {
+        clearInterval(intervalo);
+    }, 7000);
+
+    setTimeout(() => {
+        spam.style.display = "none";
+        mostrarVideo();
+    }, 12000);
+}
+
+function mostrarVideo() {
+    document.getElementById("alertSound").pause();
+    document.getElementById("alertSound").currentTime = 0;
+
+    const cont = document.getElementById("videoContainer");
+    cont.style.display = "flex";
+    document.getElementById("video").play();
+}
+</script>
+
+</body>
+</html>
